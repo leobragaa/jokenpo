@@ -93,12 +93,12 @@ socket.on("escolha_jogador", ({ jogadorId, nomeJogador }) => {
   const j1 = jogadores[0];
 
   if (souEu) {
-    const indicador = j1.id === meuId ? "indicator-p1" : "indicator-p2";
-    document.getElementById(indicador).classList.add("ready");
+    const indicador = j1.id === meuId ? "indicator-j1" : "indicator-j2";
+    document.getElementById(indicador).classList.add("pronto");
     document.getElementById("game-status").textContent = "✅ Escolha feita! Aguardando oponente...";
   } else {
-    const indicador = j1.id === jogadorId ? "indicator-p1" : "indicator-p2";
-    document.getElementById(indicador).classList.add("ready");
+    const indicador = j1.id === jogadorId ? "indicator-j1" : "indicator-j2";
+    document.getElementById(indicador).classList.add("pronto");
     document.getElementById("game-status").textContent = `⏳ ${nomeJogador} já escolheu! Sua vez...`;
   }
 });
@@ -110,16 +110,16 @@ socket.on("sala_resultado", ({ escolhas, vencedor, message, pontos: pts, round, 
   const j1 = jogs[0], j2 = jogs[1];
   const e1 = escolhas[j1.id], e2 = escolhas[j2.id];
 
-  document.getElementById("icon-p1").textContent = mapaEmojis[e1] || "?";
-  document.getElementById("label-p1").textContent = j1.nome;
-  document.getElementById("icon-p2").textContent = mapaEmojis[e2] || "?";
-  document.getElementById("label-p2").textContent = j2.nome;
+  document.getElementById("icon-j1").textContent = mapaEmojis[e1] || "?";
+  document.getElementById("label-j1").textContent = j1.nome;
+  document.getElementById("icon-j2").textContent = mapaEmojis[e2] || "?";
+  document.getElementById("label-j2").textContent = j2.nome;
 
-  document.getElementById("icon-p1").className = "choice-icon";
-  document.getElementById("icon-p2").className = "choice-icon";
+  document.getElementById("icon-j1").className = "choice-icon";
+  document.getElementById("icon-j2").className = "choice-icon";
   if (vencedor) {
-    const iconeGanhador = vencedor === j1.id ? "icon-p1" : "icon-p2";
-    const iconePerdedor = vencedor === j1.id ? "icon-p2" : "icon-p1";
+    const iconeGanhador = vencedor === j1.id ? "icon-j1" : "icon-j2";
+    const iconePerdedor = vencedor === j1.id ? "icon-j2" : "icon-j1";
     document.getElementById(iconeGanhador).classList.add("vencedor");
     document.getElementById(iconePerdedor).classList.add("perdedor");
   }
@@ -147,7 +147,7 @@ socket.on("fim_jogo", ({ vencedorId, pontos: pts, jogadores: jogs, empate }) => 
   pontos = pts;
 
   const icone = document.getElementById("gameover-icon");
-  const titulo = document.getElementById("gameover-title");
+  const titulo = document.getElementById("gameover-titulo");
   const msg = document.getElementById("gameover-msg");
   const divPlacares = document.getElementById("final-scores");
 
@@ -170,10 +170,10 @@ socket.on("fim_jogo", ({ vencedorId, pontos: pts, jogadores: jogs, empate }) => 
   const pontuacaoVencedor = vencedorId ? pts[vencedorId] : 0;
   jogs.forEach((j) => {
     const totalPontos = pts[j.id] || 0;
-    let classe = empate ? "draw" : totalPontos === pontuacaoVencedor ? "win" : "lose";
+    let classe = empate ? "empatou" : totalPontos === pontuacaoVencedor ? "ganhou" : "perdeu";
     divPlacares.innerHTML += `
       <div class="final-score-item">
-        <span class="final-score-name">${j.nome}</span>
+        <span class="final-score-nome">${j.nome}</span>
         <span class="final-score-val ${classe}">${totalPontos}</span>
       </div>`;
   });
@@ -228,10 +228,10 @@ document.getElementById("btn-back").addEventListener("click", () => {
 });
 
 function configurarInterfaceJogo(jogs, pts, round, maxRounds) {
-  document.getElementById("name-p1").textContent = jogs[0]?.nome || "P1";
-  document.getElementById("name-p2").textContent = jogs[1]?.nome || "P2";
-  document.getElementById("pts-p1").textContent = pts[jogs[0]?.id] || 0;
-  document.getElementById("pts-p2").textContent = pts[jogs[1]?.id] || 0;
+  document.getElementById("name-j1").textContent = jogs[0]?.nome || "j1";
+  document.getElementById("name-j2").textContent = jogs[1]?.nome || "j2";
+  document.getElementById("pts-j1").textContent = pts[jogs[0]?.id] || 0;
+  document.getElementById("pts-j2").textContent = pts[jogs[1]?.id] || 0;
   atualizarRodadaInterface(round, maxRounds);
   limparIndicadores();
 }
@@ -239,24 +239,24 @@ function configurarInterfaceJogo(jogs, pts, round, maxRounds) {
 function atualizarPlacarInterface(jogs, pts) {
   const v1 = pts[jogs[0]?.id] || 0;
   const v2 = pts[jogs[1]?.id] || 0;
-  document.getElementById("pts-p1").textContent = v1;
-  document.getElementById("pts-p2").textContent = v2;
+  document.getElementById("pts-j1").textContent = v1;
+  document.getElementById("pts-j2").textContent = v2;
 
-  const c1 = document.getElementById("score-p1");
-  const c2 = document.getElementById("score-p2");
-  c1.classList.toggle("leading", v1 > v2);
-  c1.classList.toggle("trailing", v1 < v2);
-  c2.classList.toggle("leading", v2 > v1);
-  c2.classList.toggle("trailing", v2 < v1);
+  const c1 = document.getElementById("score-j1");
+  const c2 = document.getElementById("score-j2");
+  c1.classList.toggle("liderando", v1 > v2);
+  c1.classList.toggle("perdendo", v1 < v2);
+  c2.classList.toggle("liderando", v2 > v1);
+  c2.classList.toggle("perdendo", v2 < v1);
 }
 
 function atualizarRodadaInterface(round, maxRounds) {
   if (maxRounds !== undefined) {
-    document.getElementById("round-number").textContent = `${round} / ${maxRounds}`;
+    document.getElementById("round-numero").textContent = `${round} / ${maxRounds}`;
   } else {
-    const atual = document.getElementById("round-number").textContent;
+    const atual = document.getElementById("round-numero").textContent;
     const max = atual.split("/")[1]?.trim() || "3";
-    document.getElementById("round-number").textContent = `${round} / ${max}`;
+    document.getElementById("round-numero").textContent = `${round} / ${max}`;
   }
 }
 
@@ -264,12 +264,12 @@ function resetarBotoesEscolha() {
   minhaEscolha = null;
   document.querySelectorAll(".choice-btn").forEach((b) => {
     b.disabled = false;
-    b.classList.remove("selected");
+    b.classList.remove("selecionado");
   });
 }
 
 function limparIndicadores() {
-  document.getElementById("indicator-p1").classList.remove("pronto");
-  document.getElementById("indicator-p2").classList.remove("pronto");
+  document.getElementById("indicator-j1").classList.remove("pronto");
+  document.getElementById("indicator-j2").classList.remove("pronto");
   document.getElementById("indicator-text").textContent = "Aguardando escolhas...";
 }

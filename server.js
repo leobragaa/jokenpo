@@ -39,7 +39,7 @@ function getRoundResult(sala){
     const e2 = sala.escolhas[j2.id];
     const ganhador = getGanha(e1, e2);
 
-    const numeroRodadas = sala.round + 1;
+    const numeroRodadas = sala.round;
 
     if(ganhador === "empate"){
         return { ganhador: null, message: `Empatou na ${numeroRodadas} rodada !`};
@@ -136,10 +136,6 @@ io.on("connection", (socket) => {
                     jogadores: sala.jogadores,
                 });
             
-
-                const maxPontos = Math.max(...Object.values(sala.pontos));
-                const pontosNecessarios = Math.ceil(sala.maxPontos / 2);
-
                 const maxPontos = Math.max(...Object.values(sala.pontos));
                 const pontosNecessarios = Math.ceil(sala.maxRounds / 2);
 
@@ -168,12 +164,13 @@ io.on("connection", (socket) => {
                         });
 
                     }, 2500);
+
                 } else{
                     setTimeout(() => {
                         sala.round++;
                         sala.escolhas = {};
                         sala.status = "jogando";
-                        io.to(salaId).emit("proxima_round",{
+                        io.to(salaId).emit("proximo_round",{
                            round: sala.round,
                            pontos: sala.pontos,     
                         });
@@ -182,6 +179,7 @@ io.on("connection", (socket) => {
             },500);
         }
     });
+
     socket.on("reiniciar_jogo", () => {
         const salaId = socket.data.salaId;
         const sala = salas[salaId];
@@ -194,7 +192,7 @@ io.on("connection", (socket) => {
         sala.status = "jogando";
         Object.keys(sala.pontos).forEach((id) => (sala.pontos[id] = 0));
 
-        io.to(salaId).emit("joga_reiniciado", {
+        io.to(salaId).emit("jogo_reiniciado", {
             jogadores: sala.jogadores,
             round: sala.round,
             maxRounds: sala.maxRounds,

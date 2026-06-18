@@ -145,7 +145,7 @@ body {
 
 .score-name { font-size: 0.82rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
 .score-value { font-size: 2.4rem; font-weight: 900; line-height: 1; color: var(--text); }
-.score-card.liderando .score-value { color: var(--win); }
+.score-card.leading .score-value { color: var(--win); }
 .score-card.perdendo  .score-value { color: var(--lose); }
 
 .round-info { text-align: center; display: flex; flex-direction: column; gap: 2px; }

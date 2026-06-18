@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
             return;
         }
 
-        if(sala.status === "terminou"){
+        if(sala.status === "finalizado"){
             socket.emit("error", {message: "A partida chegou ao Fim."});
             return;
         }
@@ -140,25 +140,40 @@ io.on("connection", (socket) => {
                 const maxPontos = Math.max(...Object.values(sala.pontos));
                 const pontosNecessarios = Math.ceil(sala.maxPontos / 2);
 
-                if(maxPontos >= pontosNecessarios || sala.round >= sala.maxRounds){
+                const maxPontos = Math.max(...Object.values(sala.pontos));
+                const pontosNecessarios = Math.ceil(sala.maxRounds / 2);
+
+                if (maxPontos >= pontosNecessarios || sala.round >= sala.maxRounds) {
+
                     setTimeout(() => {
+
                         sala.status = "finalizado";
-                        const vencedorFinalId = Object.entries(sala.pontos).sort(
-                            (a,b) => b[1] - a[1]
-                        )[0][0];
-                        const vencedorFinal = sala.jogadores.find(
-                            (j) => j.id === vencedorFinalId
-                        );
+
                         const isEmpate = Object.values(sala.pontos).every(
-                            (s) => s === Object.values(sala.pontos)[0]
+                            (p) => p === Object.values(sala.pontos)[0]
                         );
+
+                        let vencedorFinalId = null;
+
+                        if (!isEmpate) {
+                            vencedorFinalId = Object.entries(sala.pontos)
+                                .sort((a, b) => b[1] - a[1])[0][0];
+                        }
+
+                        io.to(salaId).emit("fim_jogo", {
+                            vencedorId: vencedorFinalId,
+                            pontos: sala.pontos,
+                            jogadores: sala.jogadores,
+                            empate: isEmpate
+                        });
+
                     }, 2500);
                 } else{
                     setTimeout(() => {
                         sala.round++;
                         sala.escolhas = {};
                         sala.status = "jogando";
-                        io.to(salaId).emit("proxima_rodada",{
+                        io.to(salaId).emit("proxima_round",{
                            round: sala.round,
                            pontos: sala.pontos,     
                         });
@@ -167,7 +182,6 @@ io.on("connection", (socket) => {
             },500);
         }
     });
-
     socket.on("reiniciar_jogo", () => {
         const salaId = socket.data.salaId;
         const sala = salas[salaId];
@@ -180,7 +194,7 @@ io.on("connection", (socket) => {
         sala.status = "jogando";
         Object.keys(sala.pontos).forEach((id) => (sala.pontos[id] = 0));
 
-        io.to(salaId).emit("joga_reinicia", {
+        io.to(salaId).emit("joga_reiniciado", {
             jogadores: sala.jogadores,
             round: sala.round,
             maxRounds: sala.maxRounds,
@@ -199,7 +213,7 @@ io.on("connection", (socket) => {
         sala.jogadores = sala.jogadores.filter((j) => j.id !== socket.id);
         delete sala.escolhas[socket.id];
 
-        console.log(`${socket.data.name} saiu da sala ${salaId}`);
+        console.log(`${socket.data.nome} saiu da sala ${salaId}`);
 
         if (sala.jogadores.length === 0){
             delete salas[salaId];

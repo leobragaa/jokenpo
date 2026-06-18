@@ -120,8 +120,8 @@ socket.on("sala_resultado", ({ escolhas, vencedor, message, pontos: pts, round, 
   if (vencedor) {
     const iconeGanhador = vencedor === j1.id ? "icon-p1" : "icon-p2";
     const iconePerdedor = vencedor === j1.id ? "icon-p2" : "icon-p1";
-    document.getElementById(iconeGanhador).classList.add("winner-icon");
-    document.getElementById(iconePerdedor).classList.add("loser-icon");
+    document.getElementById(iconeGanhador).classList.add("vencedor");
+    document.getElementById(iconePerdedor).classList.add("perdedor");
   }
 
   document.getElementById("choices-grid").style.display = "none";
@@ -211,7 +211,7 @@ document.querySelectorAll(".choice-btn").forEach((btn) => {
     minhaEscolha = escolha;
 
     document.querySelectorAll(".choice-btn").forEach((b) => {
-      b.classList.toggle("selected", b.dataset.choice === escolha);
+      b.classList.toggle("selecionado", b.dataset.choice === escolha);
       b.disabled = true;
     });
 
@@ -269,7 +269,7 @@ function resetarBotoesEscolha() {
 }
 
 function limparIndicadores() {
-  document.getElementById("indicator-p1").classList.remove("ready");
-  document.getElementById("indicator-p2").classList.remove("ready");
+  document.getElementById("indicator-p1").classList.remove("pronto");
+  document.getElementById("indicator-p2").classList.remove("pronto");
   document.getElementById("indicator-text").textContent = "Aguardando escolhas...";
 }
